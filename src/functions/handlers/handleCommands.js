@@ -3,12 +3,15 @@ const { Routes } = require("discord-api-types/v9");
 const fs = require("fs");
 
 module.exports = (client) => {
+  console.log("Handling commands...");
   client.handleCommands = async () => {
     const commandFolders = fs.readdirSync("./src/commands");
     for (const folder of commandFolders) {
       const commandFiles = fs
         .readdirSync(`./src/commands/${folder}`)
         .filter((file) => file.endsWith(".js"));
+
+      console.log(commandFiles);
 
       const { commands, commandArray } = client;
 
@@ -35,7 +38,7 @@ module.exports = (client) => {
 
       console.log("Successfully reloaded application (/) commands.");
     } catch (error) {
-      console.error(error);
+      console.error("Error while handling commands : " + error);
     }
   };
 };

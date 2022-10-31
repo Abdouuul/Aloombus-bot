@@ -1,7 +1,7 @@
-const { SlashCommandBuilder } = require("discord.js");
+const Discord = require("discord.js");
 
 module.exports = {
-  data: new SlashCommandBuilder()
+  data: new Discord.SlashCommandBuilder()
     .setName("hello")
     .setDescription("This is a test of the first bot command PagMan !"),
   async execute(interaction, client) {
@@ -9,9 +9,9 @@ module.exports = {
       fetchReply: false,
     });
 
-    const newMessage = `YES I AM HERE AND WORKING  https://tenor.com/view/baby-kid-shouting-yes-yess-gif-17369003`;
+    const newMessage = `YES I AM HERE AND WORKING, you used`;
     await interaction.editReply({
-      content: newMessage,
+      content: Discord.bold(newMessage),
     });
   },
 };
