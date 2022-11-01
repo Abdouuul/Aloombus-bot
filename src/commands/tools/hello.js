@@ -1,7 +1,7 @@
-const { SlashCommandBuilder } = require("discord.js");
+const Discord = require("discord.js");
 
 module.exports = {
-  data: new SlashCommandBuilder()
+  data: new Discord.SlashCommandBuilder()
     .setName("hello")
     .setDescription("This is a test of the first bot command PagMan !"),
   async execute(interaction, client) {
