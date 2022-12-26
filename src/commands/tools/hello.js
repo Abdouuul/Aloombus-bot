@@ -9,7 +9,7 @@ module.exports = {
       fetchReply: false,
     });
 
-    const newMessage = `YES I AM HERE AND WORKING  https://tenor.com/view/baby-kid-shouting-yes-yess-gif-17369003`;
+    const newMessage = "Yo dud !";
     await interaction.editReply({
       content: newMessage,
     });
