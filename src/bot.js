@@ -46,71 +46,63 @@ client.on("ready", () => {
 client.on("messageCreate", async (msg) => {
   if (msg.author.bot) return;
 
-  if (msg.mentions.has(client.user)) {
-    let channelmessages = "";
-    const fetchedMessages = await msg.channel.messages.fetch({ limit: 5 });
-    fetchedMessages.forEach((message) => {
-      channelmessages +=
-        message.author.username + ": " + message.content + "\n";
-    });
+  const isMention = msg.mentions.has(client.user) || true;
+  const shouldRespond = isMention; // Add your logic here
+  if (!shouldRespond) return;
 
-    await msg.channel.sendTyping();
-    // create prompt then use ollama to get a reply
-    const prompt = ChatPromptTemplate.fromTemplate(
-      `<|begin_of_text|>
-      <|system|>
-     Your a discord AI bot
-      <|user|>
-      {lastmessages}
-      Here is the message you need to reply to: {message}
-      <|assistant|`
-    );
-    console.log("Last 5 messages : " + channelmessages);
-    const chain = new LLMChain({
-      llm: ollama,
-      prompt: prompt,
-    });
-    chain
-      .invoke({ message: msg.content, lastmessages: channelmessages })
-      .then((res) => {
-        console.log(res);
-        msg.channel.send(res.text);
-      });
-  }
-});
+  await msg.channel.sendTyping();
 
-client.on("messageCreate", async (msg) => {
-  if (msg.author.bot || msg.mentions.has(client.user)) return;
+  // Fetch last 5 messages
+  const fetchedMessages = await msg.channel.messages.fetch({ limit: 5 });
+  const cleanedMessages = [];
 
-  // create prompt then use ollama to get a reply
+  fetchedMessages.forEach((message) => {
+    // Skip long messages (over 300 characters) or embeds/attachments
+    if (
+      message.content.length > 300 ||
+      message.embeds.length > 0 ||
+      message.attachments.size > 0
+    )
+      return;
+
+    // Clean message content
+    let content = message.content.replace(/```[\s\S]*?```/g, "[code block]");
+    content = content.replace(/\n/g, " ").slice(0, 300); // Trim to 300 chars
+    cleanedMessages.push(`${message.author.username}: ${content}`);
+  });
+
+  const lastMessages = cleanedMessages.reverse().join("\n");
+
+  // Create prompt
   const prompt = ChatPromptTemplate.fromTemplate(
     `<|begin_of_text|>
       <|system|>
-      Your a discord AI bot
+     Your a discord AI bot
       <|user|>
+      Last 5 messages of this conversation:
       {lastmessages}
       Here is the message you need to reply to: {message}
       <|assistant|`
   );
+
   const chain = new LLMChain({
     llm: ollama,
     prompt: prompt,
   });
-  // Get last 10 messages in the channel
-  let channelmessages = "";
-  const fetchedMessages = await msg.channel.messages.fetch({ limit: 5 });
-  fetchedMessages.forEach((message) => {
-    channelmessages += message.author.username + ": " + message.content + "\n";
-  });
-  await msg.channel.sendTyping();
-  console.log("Last 5 messages : " + channelmessages);
-  console.log("replying...");
-  chain
-    .invoke({ message: msg.content, lastmessages: channelmessages })
-    .then((res) => {
-      console.log(res);
-      msg.channel.send(res.text);
-    });
-});
 
-// Randomly send a message after a certain time
+  try {
+    const res = await chain.invoke({
+      message: msg.content.slice(0, 500), // Limit message length
+      lastmessages: lastMessages,
+    });
+
+    if (res?.text) {
+      msg.channel.send(res.text);
+    } else {
+      msg.channel.send("Sorry, I couldn't generate a reply.");
+    }
+  } catch (error) {
+    console.error("Error invoking LLM:", error);
+    msg.channel.send("Oops! Something went wrong with the AI.");
+  }
+});
