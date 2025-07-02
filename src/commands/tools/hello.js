@@ -10,8 +10,9 @@ module.exports = {
     });
 
     const newMessage = "Yo dud !";
+
     await interaction.editReply({
-      content: newMessage,
+      content: Discord.bold(newMessage),
     });
   },
 };

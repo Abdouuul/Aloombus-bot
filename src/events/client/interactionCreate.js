@@ -17,5 +17,6 @@ module.exports = {
         });
       }
     }
+    console.log("interaction created.");
   },
 };

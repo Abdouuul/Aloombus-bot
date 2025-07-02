@@ -1,5 +1,6 @@
 const fs = require("fs");
 module.exports = (client) => {
+  console.log("Handling events...");
   client.handleEvents = async () => {
     const eventFolders = fs.readdirSync(`./src/events`);
     for (const folder of eventFolders) {
