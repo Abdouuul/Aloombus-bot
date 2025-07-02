@@ -9,7 +9,8 @@ module.exports = {
       fetchReply: false,
     });
 
-    const newMessage = `YES I AM HERE AND WORKING, you used`;
+    const newMessage = "Yo dud !";
+
     await interaction.editReply({
       content: Discord.bold(newMessage),
     });
